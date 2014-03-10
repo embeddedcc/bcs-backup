@@ -1,0 +1,18 @@
+body{padding:5%;font:14px "Lucida Grande",Helvetica,Arial,sans-serif}
+a{color:#00b7ff}
+i.checkmark{margin-top:-1.3em;font-size:1.5em;margin-right:.2em}
+div.has-success i{color:#008000}
+div.has-error i{color:#f00}
+.has-warning .control-label,div.has-warning i{color:#f0ad4e}
+.has-warning .form-control{border-color:#f0ad4e}
+select#process{width:13em;margin-right:5px}
+.label{font-size:95%}
+form{padding-top:15px}
+.container{min-width:300px}
+.bs-callout{margin:20px 0;padding:20px;border-left:3px solid #eee}
+.bs-callout-warning{background-color:#fcf8f2;border-color:#f0ad4e}
+.bs-callout-warning h4{color:#f0ad4e}
+.bs-callout h4{margin-top:0;margin-bottom:5px}
+.restoreOption{width:300px}
+.restoreOption span{text-decoration:underline;font-weight:bold;display:inline-block;margin-top:10px}
+.restoreOption label{width:178px;display:inline-block}
