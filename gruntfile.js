@@ -108,7 +108,20 @@ grunt.initConfig({
 			'<%= dirs.src %>/**'
 		],
 		tasks: 'default'
-	}
+	},
+	
+	// See https://github.com/thanpolas/grunt-github-pages for pre-requisites
+    githubPages: {
+        target: {
+            options: {
+                // The default commit message for the gh-pages branch
+                commitMessage: 'push'
+            },
+            // The folder where your gh-pages repo is
+            src: 'site',
+            dest: '_site'
+        }
+    }	
 });
 
 // Load helpers
@@ -118,15 +131,11 @@ grunt.loadNpmTasks('grunt-contrib-jshint');
 grunt.loadNpmTasks('grunt-contrib-stylus');
 grunt.loadNpmTasks('grunt-contrib-uglify');
 grunt.loadNpmTasks('grunt-contrib-watch');
+grunt.loadNpmTasks('grunt-github-pages');
 
 // Tasks (command line)
 grunt.registerTask('default', ['concat', 'jshint', 'jade', 'stylus']);
 grunt.registerTask('dist', ['jshint', 'uglify', 'jade', 'stylus']);
-// Tasks (used in makefile only)
-grunt.registerTask('html', ['jade']);
-grunt.registerTask('css', ['stylus']);
-grunt.registerTask('js', ['jshint', 'concat']);
-grunt.registerTask('dist-html', ['jade']);
-grunt.registerTask('dist-css', ['stylus']);
-grunt.registerTask('dist-js', ['jshint', 'uglify']);
+// create an alias for the githubPages task
+grunt.registerTask('gh-pages', ['jshint', 'uglify', 'jade', 'stylus', 'githubPages:target']);
 };

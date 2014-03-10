@@ -2,3 +2,4 @@ node_modules
 site/*.html
 site/js
 site/css
+_site
