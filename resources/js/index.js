@@ -1,3 +1,5 @@
+(function () {
+
 function backupProcess(bcs, id, callback) {
     var process = {
         id: id,
@@ -27,18 +29,27 @@ function backupProcess(bcs, id, callback) {
                         $.get(bcs.url + '/api/process/' + id + '/state/' + i, function (data) {
                             process['state'][i]['state'] = data;
                             next();
+                        })
+                        .fail(function () {
+                            console.log("error fetching state");
+                            next();
                         });
                     },
                     function (next) {
-                        async.each(['exit_conditions', 'output_controllers', 'boolean_outputs'], function (api, nextSub) {
+                        var apis = bcs.version === 'BCS-460' ? 
+                                ['exit_conditions', 'output_controllers'] :
+                                ['exit_conditions', 'output_controllers', 'boolean_outputs'];
+                                
+                        async.each(apis, function (api, nextSub) {
                             $.get(bcs.url + '/api/process/' + id + '/state/' + i + '/' + api, function (data) {
                                 process['state'][i][api] = data;
                                 nextSub();
+                            })
+                            .fail(function () {
+                                console.log("error: api - " + api);
+                                nextSub();
                             });
-                        },
-                        function () {
-                            next();
-                        });
+                        }, next);
                     }
                 ],
                 function () {
@@ -345,7 +356,7 @@ $( document ).ready( function () {
     var bcs = {
             version: null,
             url: null,
-            get probeCount() { return this.version === 'BCS-460' ? 6 : 8; },
+            get probeCount() { return this.version === 'BCS-460' ? 4 : 8; },
             get inputCount() { return this.version === 'BCS-460' ? 4 : 8; },
             get outputCount() { return this.version === 'BCS-460' ? 6 : 18; }
         },
@@ -589,4 +600,4 @@ $( document ).ready( function () {
     });
 });
 
-
+})();
