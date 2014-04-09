@@ -63,6 +63,7 @@ function backupProcess(bcs, id, callback) {
         function (done) {
             async.times(4, function (i, next) {
                 $.get(bcs.url + '/api/process/' + id + '/win/' + i, function (data) {
+                    delete data.value;
                     process['win'][i] = data;
                     next();
                 });
@@ -92,6 +93,10 @@ function backupSystem(bcs, callback) {
         function (done) {
             async.each(['device', 'system', 'network'], function (api, next) {
                 $.get(bcs.url + '/api/' + api, function (data) {
+                    if(api === 'network') {
+                        delete data.ip;
+                        delete data.mac;
+                    }
                     system[api] = data;
                     next();
                 });
@@ -300,7 +305,11 @@ function restoreProcess(bcs, id, process, callback) {
                         });
                     },
                     function (next) {
-                        async.each(['exit_conditions', 'output_controllers', 'boolean_outputs'], function (api, nextSub) {
+                        var apis = bcs.version === 'BCS-460' ? 
+                                ['exit_conditions', 'output_controllers'] :
+                                ['exit_conditions', 'output_controllers', 'boolean_outputs'];
+
+                        async.each(apis, function (api, nextSub) {
                             $.post(bcs.url + '/api/process/' + id + '/state/' + i + '/' + api, JSON.stringify(process.state[i][api]), function () {
                                 nextSub();
                             })
@@ -416,7 +425,6 @@ $( document ).ready( function () {
         var file = event.target.files[0],
             reader;
 
-        console.log(file.type);
         reader = new FileReader();
 
         reader.addEventListener("load", function(event) {
@@ -521,7 +529,6 @@ $( document ).ready( function () {
             }
         ],
         function () {
-            console.log(restoreData); 
             $('#dialog').modal('hide');
         });
         
