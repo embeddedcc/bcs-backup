@@ -9,7 +9,7 @@ function backupProcess(bcs, id, callback) {
     };
     
     
-    async.parallel([
+    async.series([
         /*
             Get Process Data
         */
@@ -23,7 +23,7 @@ function backupProcess(bcs, id, callback) {
             States
         */
         function (done) {
-            async.times(8, function (i, nextState) {
+            async.timesSeries(8, function (i, nextState) {
                 async.series([
                     function (next) {
                         $.get(bcs.url + '/api/process/' + id + '/state/' + i, function (data) {
@@ -40,7 +40,7 @@ function backupProcess(bcs, id, callback) {
                                 ['exit_conditions', 'output_controllers'] :
                                 ['exit_conditions', 'output_controllers', 'boolean_outputs'];
                                 
-                        async.each(apis, function (api, nextSub) {
+                        async.eachSeries(apis, function (api, nextSub) {
                             $.get(bcs.url + '/api/process/' + id + '/state/' + i + '/' + api, function (data) {
                                 process['state'][i][api] = data;
                                 nextSub();
@@ -61,7 +61,7 @@ function backupProcess(bcs, id, callback) {
             Wins
         */
         function (done) {
-            async.times(4, function (i, next) {
+            async.timesSeries(4, function (i, next) {
                 $.get(bcs.url + '/api/process/' + id + '/win/' + i, function (data) {
                     delete data.value;
                     process['win'][i] = data;
@@ -73,7 +73,7 @@ function backupProcess(bcs, id, callback) {
             Timers
         */
         function (done) {
-            async.times(4, function (i, next) {
+            async.timesSeries(4, function (i, next) {
                 $.get(bcs.url + '/api/process/' + id + '/timer/' + i, function (data) {
                     process['timer'][i] = data;
                     next();
@@ -89,9 +89,9 @@ function backupProcess(bcs, id, callback) {
 function backupSystem(bcs, callback) {
     var system = {};
 
-    async.parallel([
+    async.series([
         function (done) {
-            async.each(['device', 'system', 'network'], function (api, next) {
+            async.eachSeries(['device', 'system', 'network'], function (api, next) {
                 $.get(bcs.url + '/api/' + api, function (data) {
                     if(api === 'network') {
                         delete data.ip;
@@ -105,7 +105,7 @@ function backupSystem(bcs, callback) {
         
         function (done) {
             system.temp = [];
-            async.times(bcs.probeCount, function (i, next) {
+            async.timesSeries(bcs.probeCount, function (i, next) {
                 system.temp.push({});
                 $.get(bcs.url + '/api/temp/' + i, function (data) {
                     system.temp[i] = data;
@@ -116,7 +116,7 @@ function backupSystem(bcs, callback) {
         
         function (done) {
             system.din = [];
-            async.times(bcs.inputCount, function (i, next) {
+            async.timesSeries(bcs.inputCount, function (i, next) {
                 system.din.push({});
                 $.get(bcs.url + '/api/din/' + i, function (data) {
                     system.din[i] = data;
@@ -127,7 +127,7 @@ function backupSystem(bcs, callback) {
         
         function (done) {
             system.output = [];
-            async.times(bcs.outputCount, function (i, next) {
+            async.timesSeries(bcs.outputCount, function (i, next) {
                 system.output.push({});
                 $.get(bcs.url + '/api/output/' + i, function (data) {
                     system.output[i] = data;
@@ -138,7 +138,7 @@ function backupSystem(bcs, callback) {
         
         function (done) {
             system.pid = [];
-            async.times(bcs.probeCount, function (i, next) {
+            async.timesSeries(bcs.probeCount, function (i, next) {
                 system.pid.push({});
                 $.get(bcs.url + '/api/pid/' + i, function (data) {
                     system.pid[i] = data;
@@ -149,7 +149,7 @@ function backupSystem(bcs, callback) {
         
         function (done) {
             system.igniter = [];
-            async.times(3, function (i, next) {
+            async.timesSeries(3, function (i, next) {
                 system.igniter.push({});
                 $.get(bcs.url + '/api/igniter/' + i, function (data) {
                     system.igniter[i] = data;
@@ -160,7 +160,7 @@ function backupSystem(bcs, callback) {
         
         function (done) {
             system.ladder = [];
-            async.times(40, function (i, next) {
+            async.timesSeries(40, function (i, next) {
                 system.ladder.push({});
                 $.get(bcs.url + '/api/ladder/' + i, function (data) {
                     system.ladder[i] = data;
@@ -174,11 +174,26 @@ function backupSystem(bcs, callback) {
         });
 }
 
+function filterProperties(obj, filter) {
+    var copy = Object.create(Object.getPrototypeOf(obj));
+    var propNames = Object.getOwnPropertyNames(obj);
+    
+    propNames.forEach(function(name) {
+        if(filter(name, obj[name])) {
+            var desc = Object.getOwnPropertyDescriptor(obj, name);
+            Object.defineProperty(copy, name, desc);
+        }
+    });
+    
+    return copy;
+}
+ 
+
 function restoreSystem(bcs, system, callback) {
 
-    async.parallel([
+    async.series([
         function (done) {
-            async.each(['device', 'system', 'network'], function (api, next) {
+            async.eachSeries(['device', 'system'/*, 'network'*/], function (api, next) {
                 $.post(bcs.url + '/api/' + api, JSON.stringify(system[api]), function () {
                     next();
                 })
@@ -190,10 +205,12 @@ function restoreSystem(bcs, system, callback) {
         },
         
         function (done) {
-            async.times(bcs.probeCount, function (i, next) {
+            async.timesSeries(bcs.probeCount, function (i, next) {
+                var temp;
                 // Don't crash if we're posting a 460 config to a 462!
                 if(system.temp.length > i) {
-                    $.post(bcs.url + '/api/temp/' + i, JSON.stringify(system.temp[i]), function () {
+                    temp = filterProperties(system.temp[i], function (prop) { return ['temp', 'setpoint'].indexOf(prop) === -1; });
+                    $.post(bcs.url + '/api/temp/' + i, JSON.stringify(temp), function () {
                         next();
                     })
                     .fail(function () {
@@ -205,9 +222,11 @@ function restoreSystem(bcs, system, callback) {
         },
         
         function (done) {
-            async.times(bcs.inputCount, function (i, next) {
+            async.timesSeries(bcs.inputCount, function (i, next) {
+                var din;
                 if(system.din.length > i) {
-                    $.post(bcs.url + '/api/din/' + i, JSON.stringify(system.din[i]), function () {
+                    din = filterProperties(system.din[i], function (prop) { return prop !== 'on'; });
+                    $.post(bcs.url + '/api/din/' + i, JSON.stringify(din), function () {
                         next();
                     })
                     .fail(function () {
@@ -219,9 +238,11 @@ function restoreSystem(bcs, system, callback) {
         },
         
         function (done) {
-            async.times(bcs.outputCount, function (i, next) {
+            async.timesSeries(bcs.outputCount, function (i, next) {
+                var out;
                 if(system.output.length > i) {
-                    $.post(bcs.url + '/api/output/' + i, JSON.stringify(system.output[i]), function () {
+                    out = filterProperties(system.output[i], function (prop) { return prop !== 'on'; });
+                    $.post(bcs.url + '/api/output/' + i, JSON.stringify(out), function () {
                         next();
                     })
                     .fail(function () {
@@ -231,9 +252,8 @@ function restoreSystem(bcs, system, callback) {
                 }
             }, done);
         },
-        
         function (done) {
-            async.times(bcs.probeCount, function (i, next) {
+            async.timesSeries(bcs.probeCount, function (i, next) {
                 if(system.pid.length > i) {
                     $.post(bcs.url + '/api/pid/' + i, JSON.stringify(system.pid[i]), function () {
                         next();
@@ -245,9 +265,8 @@ function restoreSystem(bcs, system, callback) {
                 }
             }, done);
         },
-        
         function (done) {
-            async.times(3, function (i, next) {
+            async.timesSeries(3, function (i, next) {
                 $.post(bcs.url + '/api/igniter/' + i, JSON.stringify(system.igniter[i]), function () {
                     next();
                 })
@@ -257,9 +276,8 @@ function restoreSystem(bcs, system, callback) {
                 });
             }, done);
         },
-        
         function (done) {
-            async.times(40, function (i, next) {
+            async.timesSeries(40, function (i, next) {
                 $.post(bcs.url + '/api/ladder/' + i, JSON.stringify(system.ladder[i]), function () {
                     next();
                 })
@@ -276,12 +294,13 @@ function restoreSystem(bcs, system, callback) {
 }
 
 function restoreProcess(bcs, id, process, callback) {
-    async.parallel([
+    async.series([
         /*
             Set Process Data
         */
         function (done) {
-            $.post(bcs.url + '/api/process/' + id , JSON.stringify(process.process), function () {
+            var proc = filterProperties(process.process, function (prop) { return ['running', 'paused', 'states'].indexOf(prop) === -1; });
+            $.post(bcs.url + '/api/process/' + id , JSON.stringify(proc), function () {
                 done();
             })
             .fail(function() {
@@ -293,7 +312,7 @@ function restoreProcess(bcs, id, process, callback) {
             States
         */
         function (done) {
-            async.times(8, function (i, nextState) {
+            async.timesSeries(8, function (i, nextState) {
                 async.series([
                     function (next) {
                         $.post(bcs.url + '/api/process/' + id + '/state/' + i, JSON.stringify(process.state[i].state), function () {
@@ -309,7 +328,7 @@ function restoreProcess(bcs, id, process, callback) {
                                 ['exit_conditions', 'output_controllers'] :
                                 ['exit_conditions', 'output_controllers', 'boolean_outputs'];
 
-                        async.each(apis, function (api, nextSub) {
+                        async.eachSeries(apis, function (api, nextSub) {
                             $.post(bcs.url + '/api/process/' + id + '/state/' + i + '/' + api, JSON.stringify(process.state[i][api]), function () {
                                 nextSub();
                             })
@@ -331,8 +350,10 @@ function restoreProcess(bcs, id, process, callback) {
             Wins
         */
         function (done) {
+            var win;
             async.times(4, function (i, next) {
-                $.post(bcs.url + '/api/process/' + id + '/win/' + i, JSON.stringify(process.win[i]), function () {
+                win = filterProperties(process.win[i], function (prop) { return prop !== 'value'; });
+                $.post(bcs.url + '/api/process/' + id + '/win/' + i, JSON.stringify(win), function () {
                     next();
                 })
                 .fail(function() {
@@ -345,8 +366,10 @@ function restoreProcess(bcs, id, process, callback) {
             Timers
         */
         function (done) {
+            var timer;
             async.times(4, function (i, next) {
-                $.post(bcs.url + '/api/process/' + id + '/timer/' + i, JSON.stringify(process.timer[i]), function () {
+                timer = filterProperties(process.timer[i], function (prop) { return ['on', 'value', 'enabled'].indexOf(prop) === -1; });
+                $.post(bcs.url + '/api/process/' + id + '/timer/' + i, JSON.stringify(timer), function () {
                     next();
                 })
                 .fail(function() {
@@ -385,7 +408,7 @@ $( document ).ready( function () {
                 $('button#backup').removeClass('disabled');
                 
                 processes = [];
-                async.times(8, function (id, next) {
+                async.timesSeries(8, function (id, next) {
                     $.get(event.target.value + '/api/process/' + id, function (data) {
                         processes.push({id: id, name: data.name});
                         next();
