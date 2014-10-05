@@ -427,6 +427,7 @@ $( document ).ready( function () {
             restoreData = JSON.parse(event.target.result);
             if(restoreData.system && restoreData.system.device) {
                 $("#restore-options").removeClass("hide");
+                $('#version-warning').siblings().remove();
                 
                 if(restoreData.system.device.type === bcs.version) {
                     $('#version-warning').addClass("hide");
