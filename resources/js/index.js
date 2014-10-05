@@ -3,7 +3,6 @@
 function backupProcess(bcs, id, callback) {
     var process = {
         id: id,
-        win: [{}, {}, {}, {}],
         timer: [{}, {}, {}, {}],
         state: [{}, {}, {}, {}, {}, {}, {}, {}]
     };
@@ -54,18 +53,6 @@ function backupProcess(bcs, id, callback) {
                 ],
                 function () {
                     nextState();
-                });
-            }, done);
-        },
-        /*
-            Wins
-        */
-        function (done) {
-            async.timesSeries(4, function (i, next) {
-                $.get(bcs.url + '/api/process/' + id + '/win/' + i, function (data) {
-                    delete data.value;
-                    process['win'][i] = data;
-                    next();
                 });
             }, done);
         },
@@ -347,22 +334,6 @@ function restoreProcess(bcs, id, process, callback) {
             done);
         },
         /*
-            Wins
-        */
-        function (done) {
-            var win;
-            async.times(4, function (i, next) {
-                win = filterProperties(process.win[i], function (prop) { return prop !== 'value'; });
-                $.post(bcs.url + '/api/process/' + id + '/win/' + i, JSON.stringify(win), function () {
-                    next();
-                })
-                .fail(function() {
-                    console.log('failure');
-                    next();
-                });
-            }, done);
-        },
-        /*
             Timers
         */
         function (done) {
@@ -398,6 +369,8 @@ $( document ).ready( function () {
         When a BCS url is entered, verify that it is running 4.0
     */
     $('[data-name=bcs]').on('change', function (event) {
+        $('#bcs').parent().removeClass('has-success').removeClass('has-error');
+
         $.get(event.target.value + '/api/device', function (data) {
             if(data.version === '4.0.0') {
                 bcs.version = data.type;
