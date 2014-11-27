@@ -1,30 +1,35 @@
 doctype 5
 html
-    head
-        title BCS Backup
-        meta(name='viewport', content='width=device-width, initial-scale=1.0')
-        meta(http-equiv='X-UA-Compatible', content='IE=edge')
-        meta(charset="utf-8")
-        link(href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css", rel="stylesheet")
-        link(rel='stylesheet', href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css")
-        link(rel='stylesheet', href='css/style.css')
-        script(src='http://code.jquery.com/jquery.js')
-        script(src='http://malsup.github.com/jquery.form.js')
-        script(src='//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js')
-        script(src='js/library.js')
+  head
+    title BCS Backup
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(charset="utf-8")
+    link(href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css", rel="stylesheet")
+    link(rel='stylesheet', href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css")
+    link(rel='stylesheet', href='css/style.css')
+    script(src='http://code.jquery.com/jquery.js')
+    script(src='http://malsup.github.com/jquery.form.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js')
+    script(src='js/library.js')
 
-    body
-        nav.navbar.navbar-inverse
-            .navbar-header
-                a.navbar-brand(href="#") BCS Utilities
-            .container
-                ul.nav.navbar-nav
-                    li
-                        a(href="/bcs-recipes") Recipes
-                    li.active
-                        a(href="/bcs-backup") Backup/Restore
-                    li
-                        a(href="/bcs-config-migrator") 3.x Config Migrator
+    // For bcs-promise
+    script(src='//kriskowal.github.io/q/q.js')
+    script(src='//lawn-chair.github.io/bcs-promise/dist/request.js')
+    script(src='//lawn-chair.github.io/bcs-promise/dist/bcs.js')
 
-        block content
-        script(src='//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js')
+  body
+    nav.navbar.navbar-inverse
+      .navbar-header
+        a.navbar-brand(href="#") BCS Utilities
+      .container
+        ul.nav.navbar-nav
+          li
+            a(href="/bcs-recipes") Recipes
+          li.active
+            a(href="/bcs-backup") Backup/Restore
+          li
+            a(href="/bcs-config-migrator") 3.x Config Migrator
+
+    block content
+    script(src='//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js')
