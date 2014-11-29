@@ -602,7 +602,7 @@ $( document ).ready( function () {
         var blob = new Blob([JSON.stringify(results)], {
           type: "text/plain;charset=utf-8"
         });
-        saveAs(blob, "bcs-backup.json");
+        saveAs(blob, ($('[data-name=fileName]').val() || "bcs-backup") + ".json");
         $('#dialog').modal('hide');
       });
   });
