@@ -1,64 +1,70 @@
 extends layout
 
 block content
-    .container#body
-        h1 BCS Backup Utility
+  .container#body
+    h1 BCS Backup Utility
+  
+    ul.nav.nav-tabs
+      li.active
+        a(href="#backup", data-toggle="tab") Backup
+      li
+        a(href="#restore", data-toggle="tab") Restore
     
-        ul.nav.nav-tabs
-            li.active
-                a(href="#backup", data-toggle="tab") Backup
-            li
-                a(href="#restore", data-toggle="tab") Restore
-        
-        .tab-content
-            .tab-pane.active(id="backup")
-                form
-                    fieldset
-                        div.form-group
-                            label.control-label(for='bcs') BCS 4.0 Device:
-                            input.form-control(type='url', data-name='bcs', data-tab='backup', placeholder='http://192.168.1.5/')
-                            i.icon-ok.pull-right.checkmark
-                            
-                        div#backup-options.form-group.hide
-                            label.checkbox  System Settings
-                                input(type='checkbox', data-name="system", checked)
-                            each val in [0, 1, 2, 3, 4, 5, 6, 7]
-                                label.checkbox Process #{val + 1}
-                                    input(type='checkbox', data-name="process", data-id=val, checked) 
-                        button.btn.btn-primary.disabled(id='backup') Begin Backup
+    .tab-content
+      .tab-pane.active(id="backup")
+        form
+          fieldset
+            div.form-group
+              label.control-label(for='bcs') BCS 4.0 Device:
+              input.form-control(type='url', data-name='bcs', data-tab='backup', placeholder='http://192.168.1.5/')
+              i.icon-ok.pull-right.checkmark
+              
+            div#backup-options.form-group.hide
+              label.checkbox  System Settings
+                input(type='checkbox', data-name="system", checked)
+              each val in [0, 1, 2, 3, 4, 5, 6, 7]
+                label.checkbox Process #{val + 1}
+                  input(type='checkbox', data-name="process", data-id=val, checked)
+              .form-group.form-inline.fileName
+                label.control-label.col-sm-2(for='fileName') Backup to file:
+                .input-group.col-sm-3
+                  input.form-control(type='text', data-name='fileName', placeholder='bcs-backup')
+                  .input-group-addon .json
+            button.btn.btn-primary.disabled(id='backup') Begin Backup
+
+  
+      .tab-pane(id="restore")
+        form
+          fieldset
+            div.form-group
+              label.control-label(for='bcs') BCS 4.0 Device:
+              input.form-control(type='url', data-name='bcs', data-tab='restore', placeholder='http://192.168.1.5/')
+              i.icon-ok.pull-right.checkmark
     
-            .tab-pane(id="restore")
-                form
-                    fieldset
-                        div.form-group
-                            label.control-label(for='bcs') BCS 4.0 Device:
-                            input.form-control(type='url', data-name='bcs', data-tab='restore', placeholder='http://192.168.1.5/')
-                            i.icon-ok.pull-right.checkmark
-        
-                        div.form-group
-                            label.control-label(for='backupFile') BCS Backup File:
-                            input.form-control(type='file', data-name='backupFile')
-                            i.icon-ok.pull-right.checkmark
-                        
-                        div#restore-options.form-group
-                            div.bs-callout.bs-callout-warning.hide#version-warning
-                                h4 Different Device Types
-                                span This backup was created on a different device type.  The restore will probably work fine, but there may be some settings which are not applied properly
-                        
-                        button.btn.btn-primary.disabled(id='restore') Restore Backup
-    
-    .modal.fade(id='dialog')
-        .modal-dialog
-            .modal-content
-                .modal-header
-                    button.close(data-dismiss='modal', aria-hidden='true') &times;
-                    h4.modal-title Backing Up...
-                .modal-body
+            div.form-group
+              label.control-label(for='backupFile') BCS Backup File:
+              input.form-control(type='file', data-name='backupFile')
+              i.icon-ok.pull-right.checkmark
+            
+            div#restore-options.form-group
+              div.bs-callout.bs-callout-warning.hide#version-warning
+                h4 Different Device Types
+                span This backup was created on a different device type.  The restore will probably work fine, but there may be some settings which are not applied properly
+            
+            button.btn.btn-primary.disabled(id='restore') Restore Backup
+  
+  .modal.fade(id='dialog')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(data-dismiss='modal', aria-hidden='true') &times;
+          h4.modal-title Backing Up...
+        .modal-body
 
 
-    div#progress(style='display:none')
-        .progress
-            .progress-bar.progress-bar-success(style='width: 0%', role='progressbar', aria-valuenow='0')
-            .progress-bar.progress-bar-danger(style='width: 0%', role='progressbar', aria-valuenow='0')
+  div#progress(style='display:none')
+    .progress
+      .progress-bar.progress-bar-success(style='width: 0%', role='progressbar', aria-valuenow='0')
+      .progress-bar.progress-bar-danger(style='width: 0%', role='progressbar', aria-valuenow='0')
 
-    script(src='js/index.js')
+  script(src='js/index.js')
