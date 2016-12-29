@@ -1,6 +1,6 @@
 /*global BCS */
 (function () {
-  
+
 var bcs = {};
 var processList = $('<select>', {'data-name': 'processDest'});
 
@@ -203,7 +203,7 @@ function restoreSystem(system, callback) {
             temp = filterProperties(system.temp[i], function(prop) {
               return ['temp', 'setpoint'].indexOf(prop) === -1;
             });
-            
+
             bcs.write('temp/' + i, temp).then(function () {
               next();
             })
@@ -253,7 +253,7 @@ function restoreSystem(system, callback) {
       function(done) {
         async.timesSeries(bcs.probeCount, function(i, next) {
           if (system.pid.length > i) {
-            
+
             bcs.write('pid/' + i, system.pid[i]).then(function () {
               next();
             })
@@ -382,18 +382,18 @@ $( document ).ready( function () {
     if($(event.target.parentElement).find('.credentials [data-name=password]')[0]) {
       bcs = new BCS.Device(event.target.value, {
         auth: {
-          username: 'admin', 
+          username: 'admin',
           password: $(event.target.parentElement).find('.credentials [data-name=password]')[0].value
         }});
     } else {
       bcs = new BCS.Device(event.target.value);
     }
-    
+
     bcs.on('ready', function () {
       localStorage['bcs-backup.url'] = event.target.value;
       $('[data-name=bcs]').parent().addClass('has-success').removeClass('has-error');
       $('button#backup').removeClass('disabled');
-      
+
       bcs.helpers.getProcesses().then(function (processes) {
         processes.forEach( function (process, i) {
           $('[data-name=process][data-id=' + i +']').parent()
@@ -418,9 +418,9 @@ $( document ).ready( function () {
       }
     });
   });
-  
-  $('[data-name=password][data-tab=backup]').on('change', function () {
-    $('[data-name=bcs][data-tab=backup]').change();
+
+  $('[data-name=password]').on('change', function () {
+    $('[data-name=bcs]').change();
   });
   /*
       Read the backup file to restore from disk
@@ -459,7 +459,7 @@ $( document ).ready( function () {
             }))
             .appendTo($('#restore-options'));
         }
-        
+
 
         $('<div>', {'class': 'restoreOption'})
           .append($('<span>').text('Backed Up Process'))
@@ -467,7 +467,7 @@ $( document ).ready( function () {
           .appendTo($('#restore-options'));
 
         restoreData.processes.sort(function (a,b) { return a.id - b.id; });
-          
+
         restoreData.processes.forEach(function(process, i) {
           $('<div>', {'class': 'restoreOption'})
             .append(
@@ -490,16 +490,16 @@ $( document ).ready( function () {
 
     reader.readAsText(file);
   });
-    
+
   /*
       Restore the URL on page load if we saved one in localStorage
   */
   if(localStorage['bcs-backup.url'])
   {
     $('[data-name=bcs]').val(localStorage['bcs-backup.url']);
-    $('[data-name=bcs][data-tab=backup]').change();
+    $('[data-name=bcs]').change();
   }
-    
+
   /*
       When the Restore button is pressed.
   */
@@ -547,8 +547,8 @@ $( document ).ready( function () {
       });
 
   });
-    
-    
+
+
   /*
       When the backup button is pressed...
   */
