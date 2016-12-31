@@ -366,9 +366,9 @@ function restoreProcess(id, process, callback) {
         }, done);
       }
     ],
-    function() {
-      callback();
-    });
+    /* finish by calling the provided callback */
+    callback
+    );
 }
 
 
@@ -395,6 +395,7 @@ $( document ).ready( function () {
       $('button#backup').removeClass('disabled');
 
       bcs.helpers.getProcesses().then(function (processes) {
+        processList.empty();
         processes.forEach( function (process, i) {
           $('[data-name=process][data-id=' + i +']').parent()
             .contents()
@@ -402,8 +403,10 @@ $( document ).ready( function () {
             .first()
             .replaceWith(process.name);
 
-            processList.append($('<option>', { value: i }).text(process.name));
+          processList.append($('<option>', { value: i }).text(process.name));
         });
+
+        $('[data-name=backupFile]').change();
 
         $('#backup-options').removeClass('hide');
       });
@@ -488,7 +491,9 @@ $( document ).ready( function () {
       }
     });
 
-    reader.readAsText(file);
+    if(file) {
+      reader.readAsText(file);
+    }
   });
 
   /*
